@@ -13,12 +13,12 @@ import java.sql.SQLException;
  */
 public class ObjectPoolTest {
     
-    public static final String pwd="xxxxxxxx";
+    public static final String pwd="9AE7xst0iD";
 
     @Test(threadPoolSize = 1, invocationCount = 1)
     public void probandoLaCreacionDeVariasConexiones() throws Exception {
         System.out.println(Thread.currentThread().getId());
-        FabricaConexiones f=new FabricaConexiones("aretico.com",5432,"software_2","grupo8",pwd);
+        FabricaConexiones f=new FabricaConexiones("aretico.com",5432,"software_2","grupo2",pwd);
 
         PooledObject<Connection> poledCx=f.makeObject();
         Assert.assertTrue(poledCx.getObject().createStatement().execute("Select 1"));
@@ -28,7 +28,7 @@ public class ObjectPoolTest {
     @Test(threadPoolSize = 1, invocationCount = 1)
     public void probandoLaDestruccionDelObjeto() throws Exception {
         System.out.println(Thread.currentThread().getId());
-        FabricaConexiones f=new FabricaConexiones("aretico.com",5432,"software_2","grupo8",pwd);
+        FabricaConexiones f=new FabricaConexiones("aretico.com",5432,"software_2","grupo2",pwd);
         
         PooledObject<Connection> poledCx=f.makeObject();
         f.destroyObject(poledCx);
@@ -38,7 +38,7 @@ public class ObjectPoolTest {
     @Test(threadPoolSize = 1, invocationCount = 1)
     public void probandoLaValidacion() throws Exception {
         System.out.println(Thread.currentThread().getId());
-        FabricaConexiones f=new FabricaConexiones("aretico.com",5432,"software_2","grupo8",pwd);
+        FabricaConexiones f=new FabricaConexiones("aretico.com",5432,"software_2","grupo2",pwd);
 
         PooledObject<Connection> poledCx=f.makeObject();
         Boolean valido=f.validateObject(poledCx);

@@ -14,10 +14,10 @@ public class SingletonConnection {
 
     private SingletonConnection() throws ClassNotFoundException, SQLException {
         Class.forName("org.postgresql.Driver");
-        String url="jdbc:postgresql://host:5432/software_2";
+        String url="jdbc:postgresql://aretico.com:5432/software_2";
         synchronized (control) {
             if(connection!=null) return;
-            connection = DriverManager.getConnection(url, "grupo8", "xxxxxxx");
+            connection = DriverManager.getConnection(url, "grupo2", "9AE7xst0iD");
         }
     }
     public static Connection getConnection() throws ClassNotFoundException, SQLException {
