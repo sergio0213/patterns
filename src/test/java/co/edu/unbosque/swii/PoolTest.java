@@ -15,6 +15,7 @@ import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -23,7 +24,9 @@ import org.testng.annotations.Test;
  */
 public class PoolTest {
 
+    ObjectPool<Connection> pool;
     public static final String pwd = "9AE7xst0iD";
+    long time_start, time_end;
 
     @Test(expectedExceptions = org.postgresql.util.PSQLException.class,
             expectedExceptionsMessageRegExp = ".*too many connections.*"
@@ -65,8 +68,7 @@ public class PoolTest {
     @Test(expectedExceptions = java.lang.AssertionError.class)
     public void quePasaCuandoSeRetornaUnaconexionContransaccionIniciada() throws Exception {
 
-        FabricaConexiones fc = new FabricaConexiones("aretico.com", 5432, "software_2", "grupo2_5", pwd);
-        ObjectPool<Connection> pool = new GenericObjectPool<Connection>(fc);
+       
         Connection c = pool.borrowObject();
         c.setAutoCommit(false);
         c.createStatement().execute("Insert into prueba values('nombres')");
@@ -80,32 +82,33 @@ public class PoolTest {
 
     @Test(threadPoolSize = 5, invocationCount = 5)
     public void midaTiemposParaInsertar1000RegistrosConSingleton() throws Exception {
-     
-            long time_start, time_end;
-            time_start = System.currentTimeMillis();
-            
-             Connection cx=SingletonConnection.getConnection();
-            for (int i = 0; i < 1000; i++) {              
-                cx.createStatement().execute("Insert into hilos values('"+Thread.currentThread().getName()+ ","+i+"')");
-                       }            
-            time_end = System.currentTimeMillis();
-            System.out.println("#\n " + Thread.currentThread().getName() + " Duracion: " + (time_end - time_start) + " milliseconds");
-       
+
+        time_start = System.currentTimeMillis();
+        Connection cx = SingletonConnection.getConnection();
+        for (int i = 0; i < 200; i++) {
+            cx.createStatement().execute("Insert into hilos values('" + Thread.currentThread().getName() + "," + i + "')");
+        }
+        time_end = System.currentTimeMillis();
+        System.out.println("#\n " + Thread.currentThread().getName() + " Duracion: " + (time_end - time_start) + " milliseconds");
+
+    }
+
+    @BeforeClass
+    public void iniciarPool() {
+        FabricaConexiones fc = new FabricaConexiones("aretico.com", 5432, "software_2", "grupo2_5", pwd);
+        pool = new GenericObjectPool<Connection>(fc);
     }
 
     @Test(threadPoolSize = 5, invocationCount = 5)
     public void midaTiemposParaInsertar1000RegistrosConObjectPool() throws Exception {
-      long time_start, time_end;
+
         time_start = System.currentTimeMillis();
-        FabricaConexiones fc = new FabricaConexiones("aretico.com", 5432, "software_2", "grupo2_5", pwd);
-        ObjectPool<Connection> pool = new GenericObjectPool<Connection>(fc);
         Connection c = pool.borrowObject();
-        for (int i = 0; i < 1000; i++) {
-            
-            c.createStatement().execute("Insert into prueba values('"+Thread.currentThread().getName()+" - " + i + "')");
-            
+        for (int i = 0; i < 200; i++) {
+            c.createStatement().execute("Insert into prueba values('" + Thread.currentThread().getName() + " - " + i + "')");
         }
         time_end = System.currentTimeMillis();
-            System.out.println("# "+Thread.currentThread().getName()+"\n  Duracion: " + (time_end - time_start) + " milliseconds");
+        System.out.println("# " + Thread.currentThread().getName() + "\n  Duracion: " + (time_end - time_start) + " milliseconds");
+    pool.returnObject(c);
     }
 }
